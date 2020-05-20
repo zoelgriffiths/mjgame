@@ -30,14 +30,6 @@ def make_cards(players):
         all_cards.append(all_of_one_suit)
     return all_cards
 
-def validate_player_choice(choose): 
-    if int(choose) >= 1 and int(choose) <= len(players)-1: 
-        return choose
-        
-def validate_choice(choose):
-    if choose in ["Y","N"]:
-        return choose 
-
 def choose_stuff(players,player,players_cards,players_not_cards,all_cards): 
     if player == "User": 
         if len(players) > 2:
