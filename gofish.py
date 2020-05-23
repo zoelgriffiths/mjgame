@@ -231,7 +231,7 @@ def go(player,players,players_cards,players_not_cards,all_cards,how_many_cards):
     else: 
         return end_game(players_cards,players_not_cards,all_cards,how_many_cards)
     
-    #Check for more suitable paradoxes by checking it's possible for all the cards to be consistenly allocated in atleast one way at this point. Game will end if not.
+    #Check for more sutble paradoxes by checking it's possible for all the cards to be consistenly allocated in atleast one way at this point. Game will end if not.
     determined_after_choices = is_it_determined(players,players_cards,players_not_cards,all_cards,how_many_cards)
     
     sleep(3)
@@ -253,11 +253,10 @@ def go(player,players,players_cards,players_not_cards,all_cards,how_many_cards):
         if suit not in possible_suits(chosen_player,players_cards,players_not_cards,all_cards): 
             return end_game(players_cards,players_not_cards,all_cards,how_many_cards)
         
-        #Or if if is a suit the player possibly but not definitely has, and they have no cards left unidentified in their hand, then the game ends. 
+        #Or if it one of their possible suits we accept their response of yes, giving them a copy of it if they don't already have one in their definite cards.
         else: 
-            if suit not in players_cards[player]:
-                if how_many_cards[player] <= len(players_cards[player]):
-                    return end_game(players_cards,players_not_cards,all_cards,how_many_cards)
+            if suit not in players_cards[chosen_player]:
+                players_cards[chosen_player].append(all_cards[suit-1].pop(0))  
         
     #If they say no:
     else:   
@@ -270,7 +269,7 @@ def go(player,players,players_cards,players_not_cards,all_cards,how_many_cards):
                 if suit not in players_not_cards[chosen_player]:
                     players_not_cards[chosen_player].append(suit) 
                     
-    #And check for more suitable paradoxes by checking it's possible for all the cards to be consistenly allocated in atleast one way at this point. Game will end if not.
+    #Now check for more subtle paradoxes by checking it's possible after the response for all the cards to be consistenly allocated in atleast one way. Game will end if not.
     determined_after_reply = is_it_determined(players,players_cards,players_not_cards,all_cards,how_many_cards)
                     
     #If the chosen player says yes (and the game doesn't end), then they give the asking player a card of that suit. 
@@ -280,14 +279,9 @@ def go(player,players,players_cards,players_not_cards,all_cards,how_many_cards):
         how_many_cards[chosen_player] -= 1
         how_many_cards[player] += 1
         
-        #If there is a card of that suit already in the chosen player's definite hand, we take the card from there.
-        if suit in players_cards[chosen_player]:
-            players_cards[chosen_player].remove(suit)
-            players_cards[player].append(suit)     
-        
-        #Otherwise, the card is taken from the unallocated cards, given to the chosen player (who has just admitted they have it), and then given to the asking player. Practically this is the same as the card being taken from the unallocated cards and given directly to asking player, as below.
-        else:
-            players_cards[player].append(all_cards[suit-1].pop(0))   
+        #This takes a card of the suit from the chosen player and gives it to the asking player.
+        players_cards[chosen_player].remove(suit)
+        players_cards[player].append(suit)      
             
     print()
     sleep(3)
