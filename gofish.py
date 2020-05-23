@@ -13,15 +13,12 @@ def end_game(players_cards,players_not_cards,all_cards,how_many_cards):
     print()
     print("OH NO")
     print("Someone has been a nincompoop! The game no longer makes sense. See if you can work out what has gone wrong.")
-    print("The cards we knew each player had are: {}".format(players_cards))
     print()
-    print("And the suits we knew players definitely didn't have, were: {}".format(players_not_cards))
+    print("The cards we knew each player had: {}".format(players_cards))
+    print("And the suits we knew players definitely didn't have: {}".format(players_not_cards))
     print("And the number of cards each player has: {}".format(how_many_cards))
     print()
-    for i in range(len(all_cards)): 
-        print("There were {0} cards in the {1}s suit left in the pack.".format(len(all_cards[i]),i+1))
     print("That's the end of the game!")
-    print()
     print()
     return "end"    
 
@@ -64,7 +61,7 @@ def choose_stuff(player,players,players_cards,players_not_cards,all_cards):
     else: 
         validated_player = random.choice([i for i in players if i != player])
         validated_suit = random.choice(possible_suits(player,players_cards,players_not_cards,all_cards))    
-    print("The player {0} has chosen to ask player {1} if they have the suit {2}".format(player,validated_player,validated_suit)) 
+    print("The player '{0}' has chosen to ask player '{1}' if they have the suit {2}.".format(player,validated_player,validated_suit)) 
     return validated_player,validated_suit
 
 
@@ -110,7 +107,7 @@ def reply(suit,chosen_player,players_cards,players_not_cards,all_cards):
         words = "do"
     else: 
         words = "don't"  
-    print("The player {0} has said they {1} have a card of the {2}s suit.".format(chosen_player,words,suit))
+    print("The player '{0}' has said they {1} have a card of the {2}s suit.".format(chosen_player,words,suit))
     return validated_response
        
         
@@ -125,7 +122,7 @@ def go(player,players,players_cards,players_not_cards,all_cards,how_many_cards):
     print()
     print("After ASKING:")
     print("Cards we know each player has:{}".format(players_cards))
-    print("Suits we know each player does not have are:{}".format(players_not_cards))
+    print("Suits we know each player does not have:{}".format(players_not_cards))
     print("Number of cards each player has: {}".format(how_many_cards))
     print()
     sleep(8)
@@ -158,7 +155,7 @@ def go(player,players,players_cards,players_not_cards,all_cards,how_many_cards):
     sleep(3)
     print("After REPLYING:")
     print("Cards we know each player has:{}".format(players_cards))
-    print("Suits we know each player does not have are:{}".format(players_not_cards))
+    print("Suits we know each player does not have:{}".format(players_not_cards))
     print("Number of cards each player has: {}".format(how_many_cards))
     print()
     sleep(8)
@@ -172,10 +169,7 @@ def go(player,players,players_cards,players_not_cards,all_cards,how_many_cards):
 def is_it_determined(players,players_cards,players_not_cards,all_cards,how_many_cards):
     space_left = []
     for player in players:
-        if how_many_cards[player] - len(players_cards[player]) > 0:
-            space_left.append(how_many_cards[player] - len(players_cards[player]))
-        else:
-            space_left.append(0)                                                      
+        space_left.append(how_many_cards[player] - len(players_cards[player]))       
     poss_cards_everyone = []
     for i in range(len(players)): 
         poss_cards_for_each_player = []
@@ -215,7 +209,7 @@ def is_it_determined(players,players_cards,players_not_cards,all_cards,how_many_
         return determined,"nothing"
     elif count == 1:
         determined = "yes"
-        correct_cards = dict(zip(players,correct_card_arrangement))
+        correct_cards = dict(zip(players,correct_card_arrangement[0]))
         return determined,correct_cards
     else:
         print("It thinks there is not a way of the cards now being allocated. Something has gone wrong with the game.")
@@ -241,14 +235,17 @@ def play_the_game(number):
             status = go(player,players,players_cards,players_not_cards,all_cards,how_many_cards)
             if status == "end":
                 game = "end"
+                break
             else:
                 determined = is_it_determined(players,players_cards,players_not_cards,all_cards,how_many_cards)
                 if determined[0] == "yes":
-                    print("The game is now determined. So the player {0} is the winner as they had the last go.".format(player))
-                    print("The cards we knew each player had are: {}".format(players_cards))
-                    print("The suits we knew each player definitely didn't have are:{}".format(players_not_cards))
-                    print("And we can see here how many cards each player has: {}".format(how_many_cards))
-                    print("There is only way the cards we don't explicitly know about can be held at this moment. The remaining cards are allocated as such: {}".format(determined[1]))
+                    print("DETERMINED:")
+                    print("The game is now determined. So the player '{0}' is the winner as they had the last go.".format(player))
+                    print("The cards we knew each player had: {}".format(players_cards))
+                    print("The suits we knew each player definitely didn't have:{}".format(players_not_cards))
+                    print("And the number of cards each player has: {}".format(how_many_cards))
+                    print()
+                    print("There is only one possible way the remaining cards (the cards we don't explicitly know the location of) can be arranged at this moment. The remaining cards must have been allocated as such: {}".format(determined[1]))
                     print()
                     game = "end"
                     break
@@ -264,10 +261,10 @@ def play_the_game(number):
                         if sum(who_can_have_it) == 1:
                             winner = players[who_can_have_it.index(1)]
                             winning_suit = suit
-                            print("We have a winner! {0} must have all the {1}s".format(winner,suit))
+                            print("We have a winner! '{0}' must have all the {1}s, therefore they are the winner.".format(winner,suit))
                             print("The cards we knew each player had are: {}".format(players_cards))
                             print("The suits we knew each player definitely didn't have are:{}".format(players_not_cards))
-                            print("And we can see here how many cards each player has: {}".format(how_many_cards))
+                            print("And the number of cards each player has are: {}".format(how_many_cards))
                             game = "end"
                             break
                         else: 
@@ -281,7 +278,7 @@ def start_the_game():
     print("Welcome to the game 'Quantum Go Fish'. This is a f***ing ridiculous game that has taken over my life for the last couple of days. The rules are here: https://stacky.net/wiki/index.php?title=Quantum_Go_Fish")
     sleep(3)
     print()
-    print("Read the rules before you play the game so you know what's going on.In my version the suits are already named. They are named after the positive integers from 1 up to the number of players in the game.")
+    print("Read the rules before you play the game so you know what's going on. In my version the suits are already named. They are named after the positive integers from 1 up to the number of players in the game.")
     print()
     print("The computer players might make mistakes that end the game for everyone just like a human might, but they are not actually trying to win the game, like a human is. It may run slowly with more than three players.")
     print()
