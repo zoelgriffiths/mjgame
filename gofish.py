@@ -133,97 +133,7 @@ def reply(suit,chosen_player,players_cards,players_not_cards,all_cards):
         words = "don't"  
     print("The player '{0}' has said they {1} have a card of the {2}s suit.".format(chosen_player,words,suit))
     return validated_response
-       
-    
-    
-#This function make a player's 'go' happen.        
-def go(player,players,players_cards,players_not_cards,all_cards,how_many_cards):  
-    
-    #The player whose go it is chooses a player to ask and a suit to ask about.
-    chosen_player,suit = choose_stuff(player,players,players_cards,players_not_cards,all_cards)
-    
-    #If the suit they ask about is one they possibly but not definitely have, it becomes one they definitely have, unless they have no more cards left unidentified. In that case, the game ends.
-    if suit in possible_suits(player,players_cards,players_not_cards,all_cards): 
-        if suit not in players_cards[player]:
-            if how_many_cards[player] > len(players_cards[player]):
-                players_cards[player].append(all_cards[suit-1].pop(0))
-            else:
-                return end_game(players_cards,players_not_cards,all_cards,how_many_cards)
-            
-    #Unless that suit is not in their possible suits, in which case they've created a paradox and ended the gane.     
-    else: 
-        return end_game(players_cards,players_not_cards,all_cards,how_many_cards)
-    
-    sleep(3)
-    print()
-    print("After ASKING:")
-    print("Cards we know each player has:{}".format(players_cards))
-    print("Suits we know each player does not have:{}".format(players_not_cards))
-    print("Number of cards each player has: {}".format(how_many_cards))
-    print()
-    sleep(6)
-    
-    #The chosen player makes their response
-    validated_response = reply(suit,chosen_player,players_cards,players_not_cards,all_cards)
-    
-    #Some of the logic of their response is checked here, but the more subtle paradoxes are checked for when we see if the hands of all the players are determined.
-    
-    #If they say yes:
-    if validated_response == "Y":
-        
-        #But it's not one of their possible suits, the game ends:
-        if suit not in possible_suits(chosen_player,players_cards,players_not_cards,all_cards): 
-            return end_game(players_cards,players_not_cards,all_cards,how_many_cards)
-        
-        #Or if if is a suit the player possibly but not definitely has, and they have no cards left unidentified in their hand, then the game ends. 
-        else: 
-            if suit not in players_cards[player]:
-                if how_many_cards[player] <= len(players_cards[player]):
-                    return end_game(players_cards,players_not_cards,all_cards,how_many_cards)
-        
-    #If they say no:
-    else:   
-        #And it's a suit we know they definitely have, the game ends.
-        if suit in players_cards[chosen_player]:
-            return end_game(players_cards,players_not_cards,all_cards,how_many_cards)
-        
-        else: 
-            #Otherwise, we accept their decision to not have that suit, and if it's not already in the list of suits they definiely don't have then the suit gets added to that list.
-                if suit not in players_not_cards[chosen_player]:
-                    players_not_cards[chosen_player].append(suit)   
-                    
-    #If the chosen player says yes (and the game doesn't end), then they give the asking player a card of that suit. 
-    if validated_response == "Y":
-        
-        #this changes how many cards the chosen player and asking player have.
-        how_many_cards[chosen_player] -= 1
-        how_many_cards[player] += 1
-        
-        #If there is a card of that suit already in the chosen player's definite hand, we take the card from there.
-        if suit in players_cards[chosen_player]:
-            players_cards[chosen_player].remove(suit)
-            players_cards[player].append(suit)     
-        
-        #Otherwise, the card is taken from the unallocated cards, given to the chosen player (who has just admitted they have it), and then given to the asking player. Practically this is the same as the card being taken from the unallocated cards and given directly to asking player, as below.
-        else:
-            players_cards[player].append(all_cards[suit-1].pop(0))   
-            
-    print()
-    sleep(3)
-    print("After REPLYING:")
-    print("Cards we know each player has:{}".format(players_cards))
-    print("Suits we know each player does not have:{}".format(players_not_cards))
-    print("Number of cards each player has: {}".format(how_many_cards))
-    print()
-    sleep(6)
-    
-    #Checking the programme: shouldn't print anything if there are no code mistakes.
-    total_cards = 0
-    for person in players: 
-        total_cards += how_many_cards[person]
-    if total_cards != len(players)*4: 
-        print("Ooops this game is broken")
- 
+
 
 
  #This function checks if the hands of all the players are 'determined'. The hands are determined if there is only one possible way the cards can be held by the players.
@@ -301,6 +211,100 @@ def is_it_determined(players,players_cards,players_not_cards,all_cards,how_many_
         return end_game(players_cards,players_not_cards,all_cards,how_many_cards),"nothing"
         
         
+       
+    
+#This function make a player's 'go' happen.        
+def go(player,players,players_cards,players_not_cards,all_cards,how_many_cards):  
+    
+    #The player whose go it is chooses a player to ask and a suit to ask about.
+    chosen_player,suit = choose_stuff(player,players,players_cards,players_not_cards,all_cards)
+    
+    #If the suit they ask about is one they possibly but not definitely have, it becomes one they definitely have, unless they have no more cards left unidentified. In that case, the game ends.
+    if suit in possible_suits(player,players_cards,players_not_cards,all_cards): 
+        if suit not in players_cards[player]:
+            if how_many_cards[player] > len(players_cards[player]):
+                players_cards[player].append(all_cards[suit-1].pop(0))
+            else:
+                return end_game(players_cards,players_not_cards,all_cards,how_many_cards)
+            
+    #If that suit is not in their possible suits, in which case they've created a paradox and ended the gane.     
+    else: 
+        return end_game(players_cards,players_not_cards,all_cards,how_many_cards)
+    
+    #Check for more suitable paradoxes by checking it's possible for all the cards to be consistenly allocated in atleast one way at this point. Game will end if not.
+    determined_after_choices = is_it_determined(players,players_cards,players_not_cards,all_cards,how_many_cards)
+    
+    sleep(3)
+    print()
+    print("After ASKING:")
+    print("Cards we know each player has:{}".format(players_cards))
+    print("Suits we know each player does not have:{}".format(players_not_cards))
+    print("Number of cards each player has: {}".format(how_many_cards))
+    print()
+    sleep(6)
+    
+    #The chosen player makes their response
+    validated_response = reply(suit,chosen_player,players_cards,players_not_cards,all_cards)
+    
+    #If they say yes:
+    if validated_response == "Y":
+        
+        #But it's not one of their possible suits, the game ends:
+        if suit not in possible_suits(chosen_player,players_cards,players_not_cards,all_cards): 
+            return end_game(players_cards,players_not_cards,all_cards,how_many_cards)
+        
+        #Or if if is a suit the player possibly but not definitely has, and they have no cards left unidentified in their hand, then the game ends. 
+        else: 
+            if suit not in players_cards[player]:
+                if how_many_cards[player] <= len(players_cards[player]):
+                    return end_game(players_cards,players_not_cards,all_cards,how_many_cards)
+        
+    #If they say no:
+    else:   
+        #And it's a suit we know they definitely have, the game ends.
+        if suit in players_cards[chosen_player]:
+            return end_game(players_cards,players_not_cards,all_cards,how_many_cards)
+        
+        else: 
+            #Otherwise, we accept their decision to not have that suit, and if it's not already in the list of suits they definiely don't have then the suit gets added to that list.
+                if suit not in players_not_cards[chosen_player]:
+                    players_not_cards[chosen_player].append(suit) 
+                    
+    #And check for more suitable paradoxes by checking it's possible for all the cards to be consistenly allocated in atleast one way at this point. Game will end if not.
+    determined_after_reply = is_it_determined(players,players_cards,players_not_cards,all_cards,how_many_cards)
+                    
+    #If the chosen player says yes (and the game doesn't end), then they give the asking player a card of that suit. 
+    if validated_response == "Y":
+        
+        #this changes how many cards the chosen player and asking player have.
+        how_many_cards[chosen_player] -= 1
+        how_many_cards[player] += 1
+        
+        #If there is a card of that suit already in the chosen player's definite hand, we take the card from there.
+        if suit in players_cards[chosen_player]:
+            players_cards[chosen_player].remove(suit)
+            players_cards[player].append(suit)     
+        
+        #Otherwise, the card is taken from the unallocated cards, given to the chosen player (who has just admitted they have it), and then given to the asking player. Practically this is the same as the card being taken from the unallocated cards and given directly to asking player, as below.
+        else:
+            players_cards[player].append(all_cards[suit-1].pop(0))   
+            
+    print()
+    sleep(3)
+    print("After REPLYING:")
+    print("Cards we know each player has:{}".format(players_cards))
+    print("Suits we know each player does not have:{}".format(players_not_cards))
+    print("Number of cards each player has: {}".format(how_many_cards))
+    print()
+    sleep(6)
+    
+    #Checking the programme: shouldn't print anything if there are no code mistakes.
+    total_cards = 0
+    for person in players: 
+        total_cards += how_many_cards[person]
+    if total_cards != len(players)*4: 
+        print("Ooops this game is broken")
+ 
     
 def play_the_game(number):  
     
