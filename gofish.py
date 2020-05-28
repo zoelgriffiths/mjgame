@@ -306,7 +306,71 @@ def go(player,players,players_cards,players_not_cards,all_cards,how_many_cards):
         total_cards += how_many_cards[person]
     if total_cards != len(players)*4: 
         print("Ooops this game is broken")
- 
+        
+
+#Returns a list of suits that could (definitely or possibly) be in the hand of a particualr player. 
+def possible_suits(player,players_cards,players_not_cards,all_cards): 
+    possible_suits = []
+    for suit in range(1,len(all_cards)+1):      
+    #A particular suit gets added to the list if:
+    
+        #The suit is in the cards we know the player defintiely has (initialised line 312 - 325). 
+        if suit in players_cards[player]: 
+            possible_suits.append(suit)
+        
+        #Or if there are some cards of that suit left unallocated, and the suit is not in the list of suits the player definitely doesn't have (initialised line 312 - 325).
+        else: 
+            if len(all_cards[suit-1])>0:
+                if suit not in players_not_cards[player]:
+                        possible_suits.append(suit)
+    return possible_suits
+
+
+def four_of_a_suit(number,players,players_cards,players_not_cards,all_cards,how_many_cards):
+    winning_dictionary = {}
+    for suit in range(1,number+1):
+        who_can_have_it = []
+                        
+#For any suit, each player who could have that suit is allocated a 1.
+        for human in players:
+            if suit in possible_suits(human,players_cards,players_not_cards,all_cards):
+                who_can_have_it.append(1)
+            else: 
+                who_can_have_it.append(0)
+                                
+#If only one player gets allocated a 1, that means they have all the cards of that suit.(If there are no cards left unallocated from a suit, that suits gets removed from the possible cards of all the other players)
+        if sum(who_can_have_it) == 1:
+            winner = players[who_can_have_it.index(1)]
+            winning_dictionary[suit] = winner
+
+#If there is only one entry in the dictionary, there is only one winner.
+    if len(winning_dictionary) == 1:
+        for winning_suit,winner in winning_dictionary.items():
+            print("We have a winner! '{0}' must have all the {1}s, therefore they are the winner.".format(winner,winning_suit))
+        print("The cards we knew each player had are: {}".format(players_cards))
+        print("The suits we knew each player definitely didn't have are:{}".format(players_not_cards))
+        print("And the number of cards each player has are: {}".format(how_many_cards))
+        game = "end"
+
+#If there is more than one entry in the dictionary, there is more than one player who has four of a kind so more than one winner.
+    elif len(winning_dictionary) > 1:
+        print("Wow, we have multiple winners! They are listed below:")
+        for winning_suit,winner in winning_dictionary.items():
+            print("{0}' must have all the {1}s".format(winner,winning_suit))
+        print()
+        print("The cards we knew each player had are: {}".format(players_cards))
+        print("The suits we knew each player definitely didn't have are:{}".format(players_not_cards))
+        print("And the number of cards each player has are: {}".format(how_many_cards))
+        print()
+        print("That's the end of the game!")
+        game = "end"
+
+#If the dictionary is empty, noone has four of a kind so we keep playing.
+    else:
+        game = "keep playing"
+    
+    return game
+
     
 def play_the_game(number):  
     
@@ -359,29 +423,13 @@ def play_the_game(number):
                     
                 #if the game is not determined we then check if any of the players have won by having all four cards of the same suit.
                 else: 
-                    for suit in range(1,number+1):
-                        who_can_have_it = []
+                    four_of_a_kind = four_of_a_suit(number,players,players_cards,players_not_cards,all_cards,how_many_cards)
+                    if four_of_a_kind == "end":
+                        game = "end"
+                        break
+                    else: 
+                        game = "keep going"
                         
-                        #For any suit, each player who could have that suit is allocated a 1.
-                        for human in players:
-                            if suit in possible_suits(human,players_cards,players_not_cards,all_cards):
-                                who_can_have_it.append(1)
-                                
-                        #If only one player gets allocated a 1, that means they have all the cards of that suit.(If there are no cards left unallocated from a suit, that suits gets removed from the possible cards of all the other players).
-                        if sum(who_can_have_it) == 1:
-                            winner = players[who_can_have_it.index(1)]
-                            winning_suit = suit
-                            
-                            print("We have a winner! '{0}' must have all the {1}s, therefore they are the winner.".format(winner,suit))
-                            print("The cards we knew each player had are: {}".format(players_cards))
-                            print("The suits we knew each player definitely didn't have are:{}".format(players_not_cards))
-                            print("And the number of cards each player has are: {}".format(how_many_cards))
-                            game = "end"
-                        else: 
-                            game = "keep going"
-                            print()
-                        if game == "end": 
-                            break
         if game == "end":
             play = False 
        
